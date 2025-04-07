@@ -5,7 +5,7 @@ import datetime
 
 s3_client = boto3.client("s3")
 
-BUCKET_NAME = "lks-serverless-ml-raw"
+BUCKET_NAME = "abcdefg"
 
 def lambda_handler(event, context):
     try:
