@@ -1,0 +1,16 @@
+{
+    "features": {
+      "area": 4000,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "stories": 2,
+      "mainroad": "yes",
+      "guestroom": "no",
+      "basement": "no",
+      "hotwaterheating": "yes",
+      "airconditioning": "yes",
+      "parking": 1,
+      "prefarea": "yes",
+      "furnishingstatus": "furnished"
+    }
+  }
