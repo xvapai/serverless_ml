@@ -30,7 +30,7 @@ MODEL_PATH = "abcdefg"
 
 def load_model():
     """Download and load model from S3"""
-    s3_model_key = "abcdefg.pkl"
+    s3_model_key = "abcdefg"
     S3_CLIENT.download_file(S3_BUCKET_MODEL, s3_model_key, MODEL_PATH)
     
     with open(MODEL_PATH, "rb") as f:
