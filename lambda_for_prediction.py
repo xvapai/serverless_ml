@@ -5,6 +5,7 @@ import pandas as pd
 import logging
 from io import BytesIO
 import decimal
+import time
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -15,22 +16,22 @@ DYNAMODB = boto3.resource("dynamodb")
 SNS_CLIENT = boto3.client("sns")
 
 # S3 Buckets
-S3_BUCKET_MODEL = "abcdefg"
-S3_BUCKET_RAW = "abcdefg"
-S3_BUCKET_OUTPUT = "abcdefg"
+S3_BUCKET_MODEL = ""
+S3_BUCKET_RAW = ""
+S3_BUCKET_OUTPUT = ""
 
 # DynamoDB Table Name
-DYNAMODB_TABLE = "abcdefg"
+DYNAMODB_TABLE = ""
 
 # SNS Topic ARN (replace with your actual ARN)
-SNS_TOPIC_ARN = "abcdefg"
+SNS_TOPIC_ARN = ""
 
 # Model Path
-MODEL_PATH = "abcdefg"
+MODEL_PATH = "/tmp/housing_price_model.pkl"
 
 def load_model():
     """Download and load model from S3"""
-    s3_model_key = "abcdefg"
+    s3_model_key = "housing_price_model.pkl"
     S3_CLIENT.download_file(S3_BUCKET_MODEL, s3_model_key, MODEL_PATH)
     
     with open(MODEL_PATH, "rb") as f:
@@ -50,10 +51,14 @@ def get_prediction_class(price):
     """Classify prediction price into categories"""
     if price < 3000000:
         return 1
-    elif 3000000 <= price < 5000000:
+    elif 3000000 <= price < 4000000:
         return 2
-    else:
+    elif 4000000 <= price < 5000000:
         return 3
+    elif 5000000 <= price < 6000000:
+        return 4
+    else:
+        return 5
 
 def store_to_dynamodb(record_id, data_point, predicted_price, prediction_class):
     """Store prediction result in DynamoDB"""
@@ -61,13 +66,15 @@ def store_to_dynamodb(record_id, data_point, predicted_price, prediction_class):
 
     # Ensure recordId is a string
     record_id = str(record_id)
+    timestamp = int(time.time())
 
     # Convert float to Decimal
     predicted_price_decimal = decimal.Decimal(str(predicted_price))  # Convert float to string first to avoid precision issues
 
     table.put_item(
         Item={
-            "recordId": record_id,
+            "prediction_id": record_id,
+            "timestamp": timestamp,
             "features": json.dumps(data_point),
             "predicted_price": predicted_price_decimal,  # Use Decimal type
             "prediction_class": prediction_class
@@ -87,6 +94,7 @@ def send_sns_notification(error_message):
 
 def lambda_handler(event, context):
     """AWS Lambda handler function"""
+    logger.info(event)
     try:
         for record in event["Records"]:
             body = json.loads(record["body"]) if isinstance(record["body"], str) else record["body"]
